@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <RootNamespace>FacialHairPlacement</RootNamespace>
+    <AssemblyName>FacialHairPlacement</AssemblyName>
+    <OutputPath>..\..\$(RimWorldVersion)\Assemblies\</OutputPath>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <DebugType>none</DebugType>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(RimWorldVersion)' == '1.5'">
+    <PackageReference Include="Krafs.Rimworld.Ref" Version="1.5.4409" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(RimWorldVersion)' == '1.6'">
+    <PackageReference Include="Krafs.Rimworld.Ref" Version="1.6.4871" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Harmony is supplied at runtime by the Harmony mod, so don't ship 0Harmony.dll. -->
+    <PackageReference Include="Lib.Harmony" Version="2.3.6" ExcludeAssets="runtime" />
+  </ItemGroup>
+
+</Project>

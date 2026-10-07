@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LanguageData>
+  <FHP_SettingsCategory>Facial Hair Placement</FHP_SettingsCategory>
+
+  <FHP_Enabled>Enable facial hair offsets</FHP_Enabled>
+  <FHP_EnabledTip>When off, facial hair is drawn exactly where the game normally puts it. Your slider values are kept.</FHP_EnabledTip>
+
+  <FHP_Front>Front (facing south)</FHP_Front>
+  <FHP_Side>Side (facing east / west)</FHP_Side>
+  <FHP_SideNote>West is mirrored from east automatically.</FHP_SideNote>
+  <FHP_Back>Back (facing north)</FHP_Back>
+  <FHP_BackNote>Most beards are hidden behind the head from this angle.</FHP_BackNote>
+
+  <FHP_Horizontal>Horizontal (X)</FHP_Horizontal>
+  <FHP_Forward>Forward (X)</FHP_Forward>
+  <FHP_Vertical>Vertical (Y)</FHP_Vertical>
+
+  <FHP_Reset>Reset</FHP_Reset>
+  <FHP_ResetAll>Reset all</FHP_ResetAll>
+  <FHP_Help>Positive X moves facial hair right (or forward, toward the face, in side views). Positive Y moves it up. 1.0 is one map tile. Use - and + to nudge; hold Shift for finer steps.</FHP_Help>
+
+  <FHP_Preview>Preview</FHP_Preview>
+  <FHP_PreviewNoGame>Load a save to see a live preview on your pawns.</FHP_PreviewNoGame>
+  <FHP_PreviewNoPawns>No pawns with facial hair on any map.</FHP_PreviewNoPawns>
+  <FHP_PreviewZoom>Zoom</FHP_PreviewZoom>
+
+  <FHP_South>South</FHP_South>
+  <FHP_East>East</FHP_East>
+  <FHP_West>West</FHP_West>
+  <FHP_North>North</FHP_North>
+</LanguageData>
