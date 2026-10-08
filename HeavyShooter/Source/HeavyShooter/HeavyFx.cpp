@@ -76,7 +76,6 @@ AHeavyShellCasing::AHeavyShellCasing()
 	Collision->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
 	Collision->SetCollisionResponseToChannel(ECC_Visibility, ECR_Ignore);
 	Collision->SetSimulatePhysics(true);
-	Collision->SetMassOverrideInKg(NAME_None, 0.05f, true);
 	Collision->BodyInstance.bUseCCD = true;
 	Collision->SetLinearDamping(0.2f);
 	Collision->SetAngularDamping(0.6f);
@@ -91,6 +90,8 @@ AHeavyShellCasing::AHeavyShellCasing()
 
 void AHeavyShellCasing::Launch(const FVector& LinearVelocity, const FVector& AngularVelocityDegrees)
 {
+	// Set here rather than in the constructor: touching mass on the class default object can log engine errors.
+	Collision->SetMassOverrideInKg(NAME_None, 0.05f, true);
 	Collision->SetPhysicsLinearVelocity(LinearVelocity);
 	Collision->SetPhysicsAngularVelocityInDegrees(AngularVelocityDegrees);
 }
