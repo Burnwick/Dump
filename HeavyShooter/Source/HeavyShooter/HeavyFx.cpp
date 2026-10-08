@@ -15,7 +15,7 @@ AHeavyTransientFx::AHeavyTransientFx()
 }
 
 AHeavyTransientFx* AHeavyTransientFx::Spawn(UWorld* World, EHeavyShape Shape, const FTransform& Transform, const FLinearColor& Color,
-	float Lifetime, const FVector& EndScale, const FVector& Velocity, float Gravity)
+	float InLifetime, const FVector& InEndScale, const FVector& InVelocity, float InGravity)
 {
 	if (!World)
 	{
@@ -33,10 +33,10 @@ AHeavyTransientFx* AHeavyTransientFx::Spawn(UWorld* World, EHeavyShape Shape, co
 	Fx->Mesh->SetStaticMesh(UHeavyPartComponent::GetShapeMesh(Shape));
 	Fx->Mesh->SetPartColor(Color);
 	Fx->StartScale = Transform.GetScale3D();
-	Fx->EndScale = EndScale;
-	Fx->Velocity = Velocity;
-	Fx->Gravity = Gravity;
-	Fx->Lifetime = FMath::Max(Lifetime, 0.01f);
+	Fx->EndScale = InEndScale;
+	Fx->Velocity = InVelocity;
+	Fx->Gravity = InGravity;
+	Fx->Lifetime = FMath::Max(InLifetime, 0.01f);
 	Fx->FinishSpawning(Transform);
 	return Fx;
 }

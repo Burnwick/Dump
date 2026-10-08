@@ -22,7 +22,7 @@ public:
 	virtual void Tick(float DeltaSeconds) override;
 
 	static AHeavyTransientFx* Spawn(UWorld* World, EHeavyShape Shape, const FTransform& Transform, const FLinearColor& Color,
-		float Lifetime, const FVector& EndScale, const FVector& Velocity = FVector::ZeroVector, float Gravity = 0.f);
+		float InLifetime, const FVector& InEndScale, const FVector& InVelocity = FVector::ZeroVector, float InGravity = 0.f);
 
 private:
 	UPROPERTY(VisibleAnywhere, Category = "Fx")

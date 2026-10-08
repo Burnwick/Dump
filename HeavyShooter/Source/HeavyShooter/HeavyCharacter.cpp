@@ -405,7 +405,7 @@ void AHeavyCharacter::Input_Move(const FInputActionValue& Value)
 	MoveInput = Value.Get<FVector2D>();
 
 	// Applied here (pre-physics) rather than in Tick (post-physics) so movement has no frame of delay.
-	const float ViewYaw = static_cast<float>(GetViewRotation().Yaw);
+	const float ViewYaw = static_cast<float>(GetLookRotation().Yaw);
 	const FRotator YawRotation(0.f, ViewYaw, 0.f);
 	const FVector Forward = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
 	const FVector Right = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
@@ -464,7 +464,7 @@ void AHeavyCharacter::AddViewRotation(float YawDelta, float PitchDelta)
 	Controller->SetControlRotation(Rotation);
 }
 
-FRotator AHeavyCharacter::GetViewRotation() const
+FRotator AHeavyCharacter::GetLookRotation() const
 {
 	return Controller ? Controller->GetControlRotation() : GetActorRotation();
 }
@@ -681,7 +681,7 @@ void AHeavyCharacter::UpdateMovementState(float DeltaTime)
 
 void AHeavyCharacter::UpdateBodyAndAim(float DeltaTime)
 {
-	const FRotator View = GetViewRotation();
+	const FRotator View = GetLookRotation();
 	const float ViewYaw = HeavyMath::NormalizeAngle(static_cast<float>(View.Yaw));
 	const float ViewPitch = HeavyMath::NormalizeAngle(static_cast<float>(View.Pitch));
 
@@ -759,7 +759,7 @@ void AHeavyCharacter::UpdateAimPoint()
 	}
 	else
 	{
-		AimPoint = TraceAim(GetViewRotation(), bAimOnTarget);
+		AimPoint = TraceAim(GetLookRotation(), bAimOnTarget);
 	}
 }
 
@@ -770,7 +770,7 @@ void AHeavyCharacter::UpdateTorsoAndLegs(float DeltaTime)
 	const FVector LocalAcceleration = BodyRotation.UnrotateVector(SmoothedAcceleration);
 	const float Speed2D = static_cast<float>(LocalVelocity.Size2D());
 	const float Grounded = 1.f - HeavyMath::Clamp01(AirAlpha.Value);
-	const float Crouch = HeavyMath::Clamp01(CrouchAlpha.Value);
+	const float CrouchBlend = HeavyMath::Clamp01(CrouchAlpha.Value);
 	const float Sprint = HeavyMath::Clamp01(SprintAlpha.Value);
 
 	// Lean into acceleration and into turns. Under-damped, so the torso rocks back when you stop.
@@ -784,14 +784,14 @@ void AHeavyCharacter::UpdateTorsoAndLegs(float DeltaTime)
 	HipDrop.Update(0.f, DeltaTime, 3.5f, 0.45f);
 	const float Bob = -FMath::Abs(FMath::Sin(StridePhase)) * 3.5f * FMath::Min(SpeedAlpha, 1.3f) * Grounded;
 	const float PelvisTwist = FMath::Sin(StridePhase) * 5.f * FMath::Min(SpeedAlpha, 1.f) * Grounded;
-	Pelvis->SetRelativeLocation(FVector(0.f, 0.f, StandingHipHeight - CrouchHipDrop * Crouch + Bob + HipDrop.Value));
+	Pelvis->SetRelativeLocation(FVector(0.f, 0.f, StandingHipHeight - CrouchHipDrop * CrouchBlend + Bob + HipDrop.Value));
 	Pelvis->SetRelativeRotation(FRotator(0.f, PelvisTwist, 0.f));
 
 	// Spine: lean, twist towards the gun, and blade the shoulders side-on when holding it up.
 	const float AimRelativeYaw = HeavyMath::DeltaAngle(BodyYaw.Value, AimYaw.Value);
 	const float Blade = HeavyMath::Lerp(BladeAngleHip, BladeAngleAim, AimAlpha.Value) * (1.f - Sprint);
 	const float SpineYaw = FMath::Clamp(AimRelativeYaw * 0.55f, -40.f, 40.f) + Blade - PelvisTwist;
-	const float SpinePitch = -LeanForward.Value - 12.f * Crouch; // Negative pitch leans forward.
+	const float SpinePitch = -LeanForward.Value - 12.f * CrouchBlend; // Negative pitch leans forward.
 	Spine->SetRelativeRotation(FRotator(SpinePitch, SpineYaw, LeanRight.Value));
 
 	// Head tracks the aim.
@@ -800,7 +800,7 @@ void AHeavyCharacter::UpdateTorsoAndLegs(float DeltaTime)
 	Neck->SetRelativeRotation(FRotator(HeadPitch, HeadYaw, -LeanRight.Value * 0.5f));
 
 	// Legs: a simple walk cycle along the actual direction of travel, bent for crouch and air.
-	const float SwingAmount = HeavyMath::Lerp(26.f, 38.f, Sprint) * FMath::Min(SpeedAlpha, 1.f) * Grounded * HeavyMath::Lerp(1.f, 0.6f, Crouch);
+	const float SwingAmount = HeavyMath::Lerp(26.f, 38.f, Sprint) * FMath::Min(SpeedAlpha, 1.f) * Grounded * HeavyMath::Lerp(1.f, 0.6f, CrouchBlend);
 	const float MoveForward = Speed2D > 10.f ? static_cast<float>(LocalVelocity.X) / Speed2D : 0.f;
 	const float MoveRight = Speed2D > 10.f ? static_cast<float>(LocalVelocity.Y) / Speed2D : 0.f;
 	const float StepDirection = MoveForward >= -0.3f ? 1.f : -1.f;
@@ -813,10 +813,10 @@ void AHeavyCharacter::UpdateTorsoAndLegs(float DeltaTime)
 		const float Swing = FMath::Sin(Phase) * SwingAmount;
 
 		// Positive pitch swings the foot forward; positive roll swings it to the left.
-		float ThighPitch = Swing * MoveForward + Crouch * 50.f + Air * 22.f;
-		float ThighRoll = -Swing * 0.6f * MoveRight + (bLeft ? 6.f : -6.f) * Crouch;
+		float ThighPitch = Swing * MoveForward + CrouchBlend * 50.f + Air * 22.f;
+		float ThighRoll = -Swing * 0.6f * MoveRight + (bLeft ? 6.f : -6.f) * CrouchBlend;
 		const float KneeLift = FMath::Max(0.f, FMath::Cos(Phase) * StepDirection) * SwingAmount * 1.3f;
-		const float KneePitch = -(KneeLift + Crouch * 100.f + Air * 45.f);
+		const float KneePitch = -(KneeLift + CrouchBlend * 100.f + Air * 45.f);
 		// Keep the boot roughly flat on the ground.
 		const float AnklePitch = -(ThighPitch + KneePitch) * 0.85f;
 
@@ -1055,7 +1055,7 @@ void AHeavyCharacter::UpdateCamera(float DeltaTime)
 	CameraDip.Update(0.f, DeltaTime, 3.f, 0.5f);
 	CameraPunch.Update(0.f, DeltaTime, 5.5f, 0.5f);
 
-	const FRotator ViewYawOnly(0.f, GetViewRotation().Yaw, 0.f);
+	const FRotator ViewYawOnly(0.f, GetLookRotation().Yaw, 0.f);
 	const float StrafeSpeed = static_cast<float>(ViewYawOnly.UnrotateVector(GetVelocity()).Y);
 	CameraRoll.Update(FMath::Clamp(StrafeSpeed / FMath::Max(JogSpeed, 1.f), -1.f, 1.f) * 0.7f, DeltaTime, 2.f, 1.f);
 
@@ -1117,7 +1117,7 @@ void AHeavyCharacter::OnJumped_Implementation()
 
 float AHeavyCharacter::GetWeaponLagDegrees() const
 {
-	const FVector ViewDirection = GetViewRotation().Vector();
+	const FVector ViewDirection = GetLookRotation().Vector();
 	const FVector WeaponDirection = FRotator(AimPitch.Value, AimYaw.Value, 0.f).Vector();
 	const float Dot = FMath::Clamp(static_cast<float>(FVector::DotProduct(ViewDirection, WeaponDirection)), -1.f, 1.f);
 	return FMath::RadiansToDegrees(FMath::Acos(Dot));

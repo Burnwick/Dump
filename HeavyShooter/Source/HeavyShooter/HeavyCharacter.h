@@ -348,7 +348,7 @@ private:
 
 	/** Rotates the view directly (bypasses the engine's legacy input scales). */
 	void AddViewRotation(float YawDelta, float PitchDelta);
-	FRotator GetViewRotation() const;
+	FRotator GetLookRotation() const;
 
 	// Per frame, in order
 	void UpdateMovementState(float DeltaTime);
