@@ -1,8 +1,0 @@
-<Project>
-  <PropertyGroup>
-    <!-- Which RimWorld version to build for: 1.5 or 1.6. Override with -p:RimWorldVersion=1.5 -->
-    <RimWorldVersion Condition="'$(RimWorldVersion)' == ''">1.6</RimWorldVersion>
-    <!-- Separate obj folders so the two versions' package restores don't clash. -->
-    <BaseIntermediateOutputPath>$(MSBuildThisFileDirectory)obj\$(RimWorldVersion)\</BaseIntermediateOutputPath>
-  </PropertyGroup>
-</Project>
